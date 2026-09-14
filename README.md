@@ -27,45 +27,30 @@ backend and frontend repositories as Git submodules.
 ## Architecture
 
 ```mermaid
-flowchart LR
-    User([User]) --> Browser[React 19 + TypeScript SPA]
+flowchart TB
+    User([User]) --> Frontend[React + TypeScript frontend]
+    Frontend -->|REST / OAuth2 / WebSocket| Backend
 
-    subgraph Client[Frontend container]
-        Browser --> UI[Pages and feature components]
-        UI --> Query[TanStack Query cache]
-        UI --> Socket[STOMP + SockJS client]
-        UI --> Auth[Authentication state]
+    subgraph Backend[Spring Boot modular monolith]
+        Security[Security and JWT]
+        Auth[Authentication]
+        Users[User profiles]
+        Chats[Conversations]
+        Messages[Realtime messaging]
+        Media[Media uploads]
+
+        Security --> Auth
+        Auth --> Users
+        Users --> Chats
+        Chats --> Messages
+        Messages --> Media
     end
 
-    Browser -->|HTTPS REST and OAuth2| Proxy[Nginx reverse proxy]
-    Socket -->|WSS STOMP events| Proxy
-
-    subgraph Monolith[Spring Boot modular monolith - one deployable application]
-        Proxy --> Security[Spring Security + JWT filter]
-        Security --> Rest[REST controllers]
-        Security --> Ws[WebSocket endpoint + inbound authorization]
-
-        Rest --> AuthModule[Authentication module]
-        Rest --> UserModule[User profile module]
-        Rest --> ConversationModule[Conversation module]
-        Rest --> MessageModule[Messaging module]
-        Rest --> MediaModule[Media module]
-        Ws --> MessageModule
-        Ws --> ConversationModule
-
-        AuthModule --> Persistence[JPA repositories]
-        UserModule --> Persistence
-        ConversationModule --> Persistence
-        MessageModule --> Persistence
-        MessageModule --> Broker[Simple STOMP broker]
-        Broker --> Ws
-    end
-
-    Persistence --> MySQL[(MySQL)]
-    AuthModule --> Redis[(Redis)]
-    AuthModule --> Google[Google OAuth2]
-    AuthModule --> Mail[SMTP email provider]
-    MediaModule --> Cloudinary[Cloudinary image storage]
+    Backend --> MySQL[(MySQL)]
+    Backend --> Redis[(Redis)]
+    Backend --> Cloudinary[Cloudinary]
+    Backend --> Google[Google OAuth2]
+    Backend --> Email[Email service]
 ```
 
 The project does not use microservices. All backend modules run in one Spring Boot process
