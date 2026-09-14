@@ -1,7 +1,7 @@
 # Luma Realtime Chat Application
 
-Luma is a portfolio-ready realtime chat application built as a **modular monolith**. The
-Spring Boot backend owns the business logic and is deployed as one application; the React
+Luma is a full-stack realtime chat MVP built around a **modular-monolith backend**. The
+Spring Boot backend owns the business logic and runs as one application; the React
 client is a separate SPA that consumes its REST and STOMP/WebSocket interfaces.
 
 This repository is the system-level entry point. It keeps the independently versioned
@@ -29,32 +29,28 @@ backend and frontend repositories as Git submodules.
 ```mermaid
 flowchart TB
     User([User]) --> Frontend[React + TypeScript frontend]
-    Frontend -->|REST / OAuth2 / WebSocket| Backend
+    Frontend -->|REST / OAuth2 / STOMP| Security
 
     subgraph Backend[Spring Boot modular monolith]
         Security[Security and JWT]
-        Auth[Authentication]
-        Users[User profiles]
-        Chats[Conversations]
-        Messages[Realtime messaging]
-        Media[Media uploads]
+        Interfaces[REST controllers and WebSocket endpoint]
+        Modules[Authentication · Users · Conversations · Messaging · Media]
+        Persistence[JPA repositories]
 
-        Security --> Auth
-        Auth --> Users
-        Users --> Chats
-        Chats --> Messages
-        Messages --> Media
+        Security --> Interfaces
+        Interfaces --> Modules
+        Modules --> Persistence
     end
 
-    Backend --> MySQL[(MySQL)]
-    Backend --> Redis[(Redis)]
-    Backend --> Cloudinary[Cloudinary]
-    Backend --> Google[Google OAuth2]
-    Backend --> Email[Email service]
+    Persistence --> MySQL[(MySQL)]
+    Modules --> Redis[(Redis)]
+    Modules --> Cloudinary[Cloudinary]
+    Modules --> Google[Google OAuth2]
+    Modules --> Email[Email service]
 ```
 
 The project does not use microservices. All backend modules run in one Spring Boot process
-and are packaged into one deployable JAR/container.
+and are packaged as one application artifact.
 
 ## Clone
 
@@ -110,12 +106,5 @@ npm run build
 
 Current verified baseline: 18 backend tests and 23 frontend tests, all passing.
 
-## Deployment
-
-- `backend/compose.yml` runs the backend monolith with MySQL and Redis.
-- `frontend/Dockerfile` builds the SPA and serves it through Nginx.
-- Secrets belong in environment variables and must never be committed.
-- Configure Google Authorized Redirect URI as `/login/oauth2/code/google` on the deployed host.
-
-See each submodule's `README.md` and `docs/` directory for API, architecture, deployment
-and portfolio documentation.
+See each submodule's `README.md` and `docs/` directory for API, architecture, testing,
+and implementation notes.
