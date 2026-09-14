@@ -26,16 +26,46 @@ backend and frontend repositories as Git submodules.
 
 ## Architecture
 
-```text
-React + TypeScript SPA
-        |
-        | REST / OAuth2 / STOMP over WebSocket
-        v
-Spring Boot modular monolith
-        |
-        +-- MySQL       persistent application data
-        +-- Redis       OTP limits and one-time OAuth codes
-        +-- Cloudinary  image storage
+```mermaid
+flowchart LR
+    User([User]) --> Browser[React 19 + TypeScript SPA]
+
+    subgraph Client[Frontend container]
+        Browser --> UI[Pages and feature components]
+        UI --> Query[TanStack Query cache]
+        UI --> Socket[STOMP + SockJS client]
+        UI --> Auth[Authentication state]
+    end
+
+    Browser -->|HTTPS REST and OAuth2| Proxy[Nginx reverse proxy]
+    Socket -->|WSS STOMP events| Proxy
+
+    subgraph Monolith[Spring Boot modular monolith - one deployable application]
+        Proxy --> Security[Spring Security + JWT filter]
+        Security --> Rest[REST controllers]
+        Security --> Ws[WebSocket endpoint + inbound authorization]
+
+        Rest --> AuthModule[Authentication module]
+        Rest --> UserModule[User profile module]
+        Rest --> ConversationModule[Conversation module]
+        Rest --> MessageModule[Messaging module]
+        Rest --> MediaModule[Media module]
+        Ws --> MessageModule
+        Ws --> ConversationModule
+
+        AuthModule --> Persistence[JPA repositories]
+        UserModule --> Persistence
+        ConversationModule --> Persistence
+        MessageModule --> Persistence
+        MessageModule --> Broker[Simple STOMP broker]
+        Broker --> Ws
+    end
+
+    Persistence --> MySQL[(MySQL)]
+    AuthModule --> Redis[(Redis)]
+    AuthModule --> Google[Google OAuth2]
+    AuthModule --> Mail[SMTP email provider]
+    MediaModule --> Cloudinary[Cloudinary image storage]
 ```
 
 The project does not use microservices. All backend modules run in one Spring Boot process
