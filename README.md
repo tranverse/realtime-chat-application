@@ -59,6 +59,57 @@ flowchart LR
 | **Cloudinary** | Image storage |
 | **Google OAuth2** | External authentication |
 | **Email Service** | OTP and account-related email |
+
+## Screenshots
+
+### Authentication
+
+User authentication with email/password, Google OAuth2, password recovery, and secure JWT-based sessions.
+
+<img width="1917" height="863" alt="image" src="https://github.com/user-attachments/assets/1a888b72-f7c9-446a-a062-30e4fd0cf672" />
+
+### Realtime Messaging
+
+Realtime private messaging with image sharing, delivery status, conversation search, and a responsive chat interface.
+
+<img width="1917" height="871" alt="image" src="https://github.com/user-attachments/assets/0f6ee068-613d-4145-8d7a-28de3f38157d" />
+
+### Conversation Overview
+
+Browse conversations, filter unread and group chats, track unread message counts, and quickly access recent conversations.
+
+<img width="1917" height="871" alt="image" src="https://github.com/user-attachments/assets/f67bf2f6-0908-48f6-9aab-71f7b6d9f564" />
+
+### Create Conversations
+
+Start direct messages or create group conversations by searching and selecting participants.
+
+<img width="1917" height="868" alt="image" src="https://github.com/user-attachments/assets/c696bfd8-94a7-4da0-abe9-55171de666bd" />
+
+### Group Messaging
+
+Realtime group conversations with participant-specific messages, delivery status, and shared media support.
+
+<img width="1917" height="872" alt="image" src="https://github.com/user-attachments/assets/d6afefe6-85e1-4ef4-8042-0a60bacbda00" />
+
+### Group Management
+
+Manage group members, roles, ownership, and expiring invitation links with approval-based access.
+
+<img width="1917" height="863" alt="image" src="https://github.com/user-attachments/assets/b80fd7e3-ccd6-419f-89b8-fd0b58e3141a" />
+
+### Profile & Session Management
+
+Manage profile information, Google-linked accounts, and active sessions with device sign-out and global token revocation.
+
+<img width="1917" height="865" alt="image" src="https://github.com/user-attachments/assets/2b028f1c-bafd-4e72-91e6-93890d9ad46b" />
+
+### Notifications
+
+Unread message notifications with conversation previews and badge counts for quick access to new activity.
+
+<img width="522" height="870" alt="image" src="https://github.com/user-attachments/assets/7352322e-9dd0-4a53-b6bc-e28186449482" />
+
 ## Clone
 
 Clone the repository together with its submodules:
