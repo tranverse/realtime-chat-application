@@ -108,9 +108,12 @@ Current verified baseline: 18 backend tests and 23 frontend tests, all passing.
 
 ## System end-to-end tests
 
-The Playwright suite starts the frontend, backend, MySQL, Redis, and Mailpit with Docker
-Compose. It verifies real OTP registration, authentication/session restore, private and
-group conversations, realtime messaging, replies, edits, deletion, and read receipts.
+The regression suite starts the frontend, backend, MySQL, Redis, and Mailpit with Docker
+Compose. Playwright verifies real OTP registration, authentication/session restore,
+validation, unread notifications, private and group conversations, realtime messaging,
+replies, edits, deletion, read receipts, history reload, and confirmed group leave. A k6
+smoke load then exercises authenticated profile, conversation, and message-history reads
+with 10 concurrent virtual users and enforces a 750 ms p95 latency threshold.
 
 ```powershell
 npm install

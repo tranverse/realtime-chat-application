@@ -31,6 +31,10 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw "Playwright failed with exit code $LASTEXITCODE"
     }
+    docker compose -p luma-e2e -f $composeFile run --rm k6 run /scripts/chat-api.k6.js
+    if ($LASTEXITCODE -ne 0) {
+        throw "k6 performance smoke test failed with exit code $LASTEXITCODE"
+    }
 } finally {
     docker compose -p luma-e2e -f $composeFile down --volumes --remove-orphans
     Pop-Location

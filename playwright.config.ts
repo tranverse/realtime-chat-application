@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: process.env.E2E_FRONTEND_URL ?? 'http://127.0.0.1:15173',
-    channel: 'chrome',
+    channel: process.env.CI ? undefined : 'chrome',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'off',

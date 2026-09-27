@@ -82,3 +82,16 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+
+  k6:
+    image: grafana/k6:0.57.0
+    profiles: [performance]
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      API_BASE_URL: http://backend:8080/api/v1
+      PERF_EMAIL: alice.e2e@example.com
+      PERF_PASSWORD: E2ePassword123!
+    volumes:
+      - ./performance:/scripts:ro
