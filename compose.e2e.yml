@@ -1,0 +1,84 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: chat_application
+      MYSQL_ROOT_PASSWORD: e2e-database-password
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -pe2e-database-password --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "18025:8025"
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    ports:
+      - "18080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/chat_application?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      DB_USERNAME: root
+      DB_PASSWORD: e2e-database-password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_USERNAME: e2e
+      SPRING_MAIL_PASSWORD: e2e
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
+      GG_CLIENT_ID: e2e-google-client
+      GG_CLIENT_SECRET: e2e-google-secret
+      JWT_ACCESS_KEY: e2e-access-key-must-be-at-least-32-bytes-long
+      JWT_REFRESH_KEY: e2e-refresh-key-must-be-at-least-32-bytes-long
+      JWT_ACCESS_EXPIRATION_MINUTES: 15
+      JWT_REFRESH_EXPIRATION_DAYS: 1
+      OAUTH2_REDIRECT_URI: http://127.0.0.1:15173/oauth2/callback
+      CORS_ALLOWED_ORIGINS: http://127.0.0.1:15173
+      CLOUDINARY_CLOUD_NAME: e2e
+      CLOUDINARY_API_KEY: e2e
+      CLOUDINARY_API_SECRET: e2e
+      FLYWAY_ENABLED: "true"
+      JPA_DDL_AUTO: update
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/actuator/health | grep -q UP"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "15173:80"
+    environment:
+      BACKEND_HOST: backend:8080
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20

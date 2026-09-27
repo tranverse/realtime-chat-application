@@ -106,5 +106,16 @@ npm run build
 
 Current verified baseline: 18 backend tests and 23 frontend tests, all passing.
 
+## System end-to-end tests
+
+The Playwright suite starts the frontend, backend, MySQL, Redis, and Mailpit with Docker
+Compose. It verifies real OTP registration, authentication/session restore, private and
+group conversations, realtime messaging, replies, edits, deletion, and read receipts.
+
+```powershell
+npm install
+npm run e2e:system
+```
+
 See each submodule's `README.md` and `docs/` directory for API, architecture, testing,
 and implementation notes.

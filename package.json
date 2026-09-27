@@ -1,0 +1,11 @@
+{
+  "name": "luma-system-e2e",
+  "private": true,
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:system": "powershell -ExecutionPolicy Bypass -File ./scripts/run-e2e.ps1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}
