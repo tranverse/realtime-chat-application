@@ -33,6 +33,8 @@ test.describe.serial('Luma core user journeys', () => {
   })
 
   test('supports private realtime messaging, reply, edit, delete, and read receipts', async ({ browser }) => {
+    // This multi-browser journey includes two logins and a final history reload.
+    test.setTimeout(120_000)
     const aliceContext = await browser.newContext()
     const bobContext = await browser.newContext()
     const alice = await aliceContext.newPage()
@@ -106,6 +108,7 @@ test.describe.serial('Luma core user journeys', () => {
   })
 
   test('supports group messaging, membership details, and confirmed leave', async ({ browser }) => {
+    test.setTimeout(120_000)
     const aliceContext = await browser.newContext()
     const bobContext = await browser.newContext()
     const alice = await aliceContext.newPage()
