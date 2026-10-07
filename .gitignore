@@ -6,3 +6,10 @@ node_modules/
 playwright-report/
 test-results/
 .docker-e2e/
+
+# Internal verification notes are retained locally, not published
+*_REPORT.md
+*_SUMMARY.md
+*_AUDIT.md
+CV_*.md
+*_READINESS_*.md
