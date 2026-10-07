@@ -3,9 +3,11 @@
   "private": true,
   "scripts": {
     "e2e": "playwright test",
-    "e2e:system": "powershell -ExecutionPolicy Bypass -File ./scripts/run-e2e.ps1"
+    "e2e:system": "pwsh -NoProfile -File ./scripts/run-e2e.ps1",
+    "validate:ci": "node ./scripts/validate-ci.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0"
+    "@playwright/test": "^1.55.0",
+    "yaml": "2.9.1"
   }
 }
