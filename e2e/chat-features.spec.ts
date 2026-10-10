@@ -49,8 +49,7 @@ test.describe.serial('Luma core user journeys', () => {
       await createDialog.getByRole('button', { name: 'Start conversation' }).click()
       await expect(alice.getByRole('heading', { name: 'Bob E2E User' })).toBeVisible()
 
-      // Empty conversations are intentionally hidden from the recipient until
-      // the first message exists, so send before Bob refreshes his inbox.
+      // Send before the recipient opens the conversation to verify unread state.
       await expect(alice.locator('header').getByText('Offline', { exact: true })).toBeVisible()
       const original = `hello-${Date.now()}`
       await alice.getByRole('textbox', { name: 'Message' }).fill(original)
@@ -168,6 +167,71 @@ test.describe.serial('Luma core user journeys', () => {
       await bobContext.close()
     }
   })
+  test('synchronizes group additions, roles, ownership, removal and unread across two live users', async ({ browser }) => {
+    test.setTimeout(120_000)
+    const a = await browser.newContext(), b = await browser.newContext()
+    try {
+      const alice = await a.newPage(), bob = await b.newPage()
+      const connected = bob.waitForResponse(response => response.url().includes('/presence/config') && response.ok())
+      await login(bob, accounts.bob); await connected
+      await login(alice, accounts.alice)
+      await alice.getByRole('button', { name: 'New conversation' }).click()
+      const create = alice.getByRole('dialog', { name: 'New conversation' })
+      await create.getByRole('button', { name: 'New group' }).click()
+      const group = `Live management ${Date.now()}`
+      await create.getByLabel('Group name').fill(group)
+      await create.getByLabel('Search people').fill(accounts.carol.email)
+      await create.getByRole('button', { name: /Carol E2E/ }).click()
+      await create.getByRole('button', { name: 'Start conversation' }).click()
+      await alice.getByRole('button', { name: 'Conversation info' }).click()
+      let details = alice.getByRole('dialog', { name: 'Conversation details' })
+      const input = details.getByRole('textbox', { name: 'Search people to add' })
+      await input.fill(accounts.bob.email)
+      await details.getByRole('button', { name: /Bob E2E User @/ }).click()
+      await expect(bob.getByRole('link', { name: new RegExp(group) })).toHaveCount(0)
+      await details.getByRole('button', { name: 'Add members' }).click()
+      await expect(alice.getByText('Group updated successfully.', { exact: true })).toBeVisible()
+      await expect(details.getByText('3 active in this conversation.')).toBeVisible()
+      // Timeout is below fallback polling interval: this must use the personal realtime event.
+      await expect(bob.getByRole('link', { name: new RegExp(group) })).toBeVisible({ timeout: 10_000 })
+      await expect(bob.getByText(`You were added to ${group}.`, { exact: true })).toBeVisible()
+      await details.getByRole('button', { name: 'Close dialog' }).click()
+      const text = `read-without-notifications-${Date.now()}`
+      await alice.getByRole('textbox', { name: 'Message' }).fill(text)
+      await alice.getByRole('button', { name: 'Send', exact: true }).click()
+      const bobLink = bob.getByRole('link', { name: new RegExp(group) })
+      await expect(bobLink.getByText('1', { exact: true })).toBeVisible()
+      await bob.bringToFront(); await bobLink.click()
+      await expect(bob.locator('article', { hasText: text })).toBeVisible()
+      await expect(bobLink.getByText('1', { exact: true })).toHaveCount(0)
+      await bob.getByRole('button', { name: 'Conversation info' }).click()
+      const bobDetails = bob.getByRole('dialog', { name: 'Conversation details' })
+      await expect(bobDetails.getByText('Invite people', { exact: true })).toHaveCount(0)
+      await alice.getByRole('button', { name: 'Conversation info' }).click()
+      details = alice.getByRole('dialog', { name: 'Conversation details' })
+      await details.getByRole('combobox', { name: 'Role for Bob E2E User' }).selectOption('ADMIN')
+      await alice.getByRole('dialog', { name: 'Change member role?' }).getByRole('button', { name: 'Confirm' }).click()
+      await expect(bobDetails.getByText('Invite people', { exact: true })).toBeVisible()
+      await expect(bobDetails.getByText('ADMIN', { exact: true })).toBeVisible()
+      await details.getByRole('combobox', { name: 'Role for Bob E2E User' }).selectOption('MEMBER')
+      await alice.getByRole('dialog', { name: 'Change member role?' }).getByRole('button', { name: 'Confirm' }).click()
+      await expect(bobDetails.getByText('Invite people', { exact: true })).toHaveCount(0)
+      await details.locator('.member-row', { hasText: 'Bob E2E User' }).getByRole('button', { name: 'Transfer ownership' }).click()
+      const transfer = alice.getByRole('dialog', { name: 'Transfer ownership?' })
+      await expect(transfer.getByText(/You will become an admin/)).toBeVisible()
+      await transfer.getByRole('button', { name: 'Confirm' }).click()
+      await expect(details.getByRole('combobox')).toHaveCount(0)
+      await expect(bobDetails.getByRole('combobox', { name: 'Role for Alice E2E' })).toBeVisible()
+      await bobDetails.locator('.member-row', { hasText: 'Alice E2E' }).getByRole('button', { name: 'Remove member' }).click()
+      await bob.getByRole('dialog', { name: 'Remove this member?' }).getByRole('button', { name: 'Confirm' }).click()
+      await expect(alice.getByText('You no longer have access to this group.', { exact: true })).toBeVisible()
+      await expect(alice.getByRole('link', { name: new RegExp(group) })).toHaveCount(0)
+      await bobDetails.getByRole('button', { name: 'Close dialog' }).click()
+      await bob.getByRole('button', { name: 'Notifications', exact: true }).click()
+      await expect(bob.getByRole('region', { name: 'Notifications' }).getByText(text, { exact: true })).toHaveCount(0)
+    } finally { await a.close(); await b.close() }
+  })
+
   test('tracks real multi-tab presence and remains connected across navigation', async ({ browser }) => {
     test.setTimeout(120_000)
     const a = await browser.newContext(), b = await browser.newContext()
