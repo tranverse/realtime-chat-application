@@ -7,7 +7,15 @@ It supports private and group conversations, realtime messaging, image sharing, 
 The backend follows a **modular monolith** architecture and communicates with the frontend through **REST APIs** and **STOMP/WebSocket**.
 
 ---
+## 🎬 Demo Video
 
+[![Watch the Realtime Chat Application demo](https://img.youtube.com/vi/Bmk9TcEyu90/hqdefault.jpg)](https://www.youtube.com/watch?v=Bmk9TcEyu90)
+
+**[▶ Watch the full demo on YouTube](https://www.youtube.com/watch?v=Bmk9TcEyu90)**
+
+The demo walks through login, real-time direct messaging, message actions, group creation and invitations, notifications, presence, and account settings.
+
+---
 ## Architecture
 
 <img width="1352" height="987" alt="shape_LYU4OS4ipjuiwuCf546ll at 26-10-07 14 17 01" src="https://github.com/user-attachments/assets/554c378b-ddd7-44c5-9abe-ce83856b0a06" />
